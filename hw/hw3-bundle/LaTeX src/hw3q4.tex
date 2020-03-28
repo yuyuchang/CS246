@@ -1,0 +1,71 @@
+\section{Dense Communities in Networks (20 points)}
+
+In this problem, we study the problem of finding dense communities in networks. 
+
+\paragraph{Definitions:}
+Assume $G=(V,E)$ is an undirected graph (e.g., representing a social network).
+\begin{itemize}
+  \item For any subset $S\subseteq V$, we let the \textit{induced edge set} (denoted by $E[S]$) to be the set of edges both of whose endpoints belong to $S$.
+  \item For any $v\in S$, we let $\mbox{deg}_{S}(v)= |\{u\in S| (u,v)\in E\}|$.
+  \item Then, we define the \textit{density} of $S$ to be:
+	\[
+		\rho(S) = \frac{|E[S]|}{|S|}.
+	\]
+  \item Finally, the \textit{maximum density} of the graph $G$ is the density of the densest induced subgraph of $G$, defined as:
+	\[
+		\rho^{*}(G) = \max_{S\subseteq V} \{\rho(S)\}.
+	\]
+\end{itemize}
+
+\paragraph{Goal.} Our goal is to find an induced subgraph of $G$ whose density is not much smaller than $\rho^{*}(G)$. Such a set is very densely connected, and hence may indicate a community in the network represented by $G$. Also, since the graphs of interest are usually very large in practice, we would like the algorithm to be highly scalable. We consider the following algorithm:
+
+\begin{algorithmic}
+\REQUIRE $G = (V, E)$ and $\epsilon > 0$
+\STATE $\tilde{S}, S\leftarrow V$
+\WHILE {$S\neq\emptyset$}
+\STATE $A(S):=\left\{ i\in S \mid \deg_S(i) \leq 2(1+\epsilon)\rho (S) \right\} $
+\STATE $S\leftarrow S \setminus A(S)$
+\IF {$\rho(S)>\rho(\tilde{S})$}
+\STATE $\tilde{S} \leftarrow S$
+\ENDIF
+\ENDWHILE
+\RETURN $\tilde{S}$
+\end{algorithmic}
+
+The basic idea in the algorithm is that the nodes with low degrees do not contribute much to the density of a dense subgraph, hence they can be removed without significantly influencing the density.
+
+We analyze the quality and performance of this algorithm. We start with analyzing its performance.
+
+\subquestion{(a) [10 points]} We show through the following steps that the algorithm terminates in a logarithmic number of steps.
+\begin{enumerate}[i.]
+  \item Prove that at any iteration of the algorithm, $|A(S)|\geq \frac{\epsilon}{1+\epsilon} |S|$.
+  \item Prove that the algorithm terminates in $O(\log_{1+\epsilon}{(n)})$ iterations, where $n$ is the initial number of nodes.
+\end{enumerate}
+
+
+
+\subquestion{(b) [10 points]} We show through the following steps that the density of the set returned by the algorithm is at most a factor $2(1+\epsilon)$ smaller than $\rho^{*}(G)$.
+\begin{enumerate}[i.]
+  \item Assume $S^{*}$ is the densest subgraph of $G$. Prove that for any $v\in S^{*}$, we have: $\mbox{deg}_{S^{*}}(v) \geq \rho^{*}(G)$.
+  \item Consider the first iteration of the while loop in which there exists a node $v\in S^{*}\cap A(S)$. Prove that $2(1+\epsilon)\rho(S)\geq \rho^{*}(G)$.
+  \item Conclude that $\rho(\tilde{S}) \geq \frac{1}{2(1+\epsilon)}\rho^{*}(G)$.
+\end{enumerate}
+
+
+
+\subsection*{What to submit}
+\begin{enumerate}[(a)]
+    \item
+        \begin{enumerate}[i.]
+            \item Proof of  $|A(S)|\geq \frac{\epsilon}{1+\epsilon} |S|$.
+            \item Proof of  number of iterations for algorithm to terminate.
+        \end{enumerate}
+    \item
+        \begin{enumerate}[i.]
+            \item Proof of  $\mbox{deg}_{S^{*}}(v) \geq \rho^{*}(G)$.
+            \item Proof of $2(1+\epsilon)\rho(S)\geq \rho^{*}(G)$.
+            \item Conclude that $\rho(\tilde{S}) \geq \frac{1}{2(1+\epsilon)}\rho^{*}(G)$.
+        \end{enumerate} 
+\end{enumerate}
+
+

@@ -1,0 +1,151 @@
+\section{Implementation of SVM via Gradient Descent (30 points) }
+Here, you will implement the soft margin SVM using different gradient descent methods as described in the section 12.3.4 of the textbook. To recap, to estimate the $\mathbf{w}, b$ of the soft margin SVM, we can minimize the cost:
+\begin{align}
+f(\mathbf{w},b) = \frac{1}{2} \sum_{j=1}^d (w^{(j)})^2 + C \sum_{i=1}^n \max\left\{0, 1 - y_i\left(\sum_{j=1}^d w^{(j)}x_i^{(j)} + b \right)\right\}.
+\end{align}
+In order to minimize the function, we first obtain the gradient with respect to $w^{(j)}$, the $j$th item in the vector $\mathbf{w}$, as follows.
+\begin{align}
+\nabla_{w^{(j)}} f(\mathbf{w},b)  = \frac{\partial f(\mathbf{w},b)}{\partial w^{(j)}} = w^{(j)} + C \sum_{i = 1}^n \frac{\partial L(x_i, y_i)}{\partial w^{(j)}},
+\end{align}
+where:
+\begin{align*}
+ \frac{\partial L(x_i, y_i)}{\partial w^{(j)}} =     
+ \left\{\begin{array}{cl}
+      0 & \text{if}\  y_i\left(\mathbf{x_i} \cdot \mathbf{w}  + b \right) \ge 1 \\
+      -y_ix_i^{(j)} & \text{otherwise.}
+    \end{array}\right.
+\end{align*}
+Now, we will implement and compare the following gradient descent techniques:
+\begin{enumerate}
+\item  \textbf{Batch gradient descent}: Iterate through the entire dataset and update the parameters as follows:
+\begin{algorithmic}
+\STATE k = 0
+\WHILE {convergence criteria not reached}
+\FOR {$j = 1,...,d$}
+\STATE Update $w^{(j)} \leftarrow w^{(j)} - \eta \nabla_{w^{(j)}} f(\mathbf{w},b)$
+\ENDFOR
+\STATE Update $b \leftarrow b - \eta \nabla_{b} f(\mathbf{w},b)$
+\STATE Update $k \leftarrow k+1$
+\ENDWHILE
+\end{algorithmic}
+where, \\
+$n$ is the number of samples in the training data,\\
+ $d$ is the dimensions of $\mathbf{w}$, \\
+ $\eta$ is the learning rate of the gradient descent, and\\
+ $\nabla_{w^{(j)}} f(\mathbf{w},b) $ is the value computed from computing equation (2) above and $\nabla_{b} f(\mathbf{w},b)$ is the value computed from your answer in question (a) below.
+ 
+The {\em convergence criteria} for the above algorithm is $\Delta_{\% cost} < \epsilon$, where  
+\begin{align}
+\Delta_{\% cost } = \frac{|f_{k-1}(\mathbf{w}, b) - f_{k}(\mathbf{w}, b)|\times100}{f_{k-1}(\mathbf{w}, b)}.
+\label{eq:stop}
+\end{align}
+where,\\
+$f_{k}(\mathbf{w}, b)$ is the value of equation (1) at $k$th iteration, \\
+$\Delta_{\% cost}$ is computed at the end of each iteration of the while loop. \\
+Initialize $\mathbf{w = 0}, b = 0$ and compute $f_{0}(\mathbf{w}, b)$ with these values.\\
+\textbf{For this method, use $\mathbf{\eta = 0.0000003, \epsilon = 0.25}$}
+
+\item  \textbf{Stochastic gradient descent}: Go through the dataset and update the parameters, one training sample at a time, as follows:
+\begin{algorithmic}
+\STATE Randomly shuffle the training data
+\STATE $i = 1, k = 0$
+\WHILE {convergence criteria not reached}
+\FOR {$j = 1,...,d$}
+\STATE Update $w^{(j)} \leftarrow w^{(j)} - \eta \nabla_{w^{(j)}} f_{i}(\mathbf{w},b)$
+\ENDFOR
+\STATE Update $b \leftarrow b - \eta \nabla_{b} f_{i}(\mathbf{w},b)$
+\STATE Update $i \leftarrow (i \mod n) + 1$
+\STATE Update $k \leftarrow k+1$
+\ENDWHILE
+\end{algorithmic}
+where,\\
+ $n$ is the number of samples in the training data,\\
+ $d$ is the dimensions of $\mathbf{w}$, \\
+ $\eta$ is the learning rate and\\
+ $\nabla_{w^{(j)}}  f_{i}(\mathbf{w},b)$ is defined for a single training sample as follows: 
+\begin{align*}
+\nabla_{w^{(j)}} f_{i}(\mathbf{w},b)  = \frac{\partial f_{i}(\mathbf{w},b)}{\partial w^{(j)}} = w^{(j)} + C \frac{\partial L(x_i, y_i)}{\partial w^{(j)}} 
+\end{align*}
+(Note that you will also have to derive $\nabla_{b} f_{i}(\mathbf{w},b)$, but it should be similar to your solution to question (a) below.\\
+The {\em convergence criteria} here is $\Delta_{cost}^{(k)} < \epsilon$, where  
+\begin{align*}
+\Delta_{cost}^{(k)} = 0.5*\Delta_{cost}^{(k-1)} + 0.5*\Delta_{\% cost},
+\end{align*}  
+where,\\
+$k$ = iteration number, and\\
+$\Delta_{\% cost}$ is same as above (equation~\ref{eq:stop}). 
+
+Calculate $\Delta_{cost}, \Delta_{\% cost}$ at the end of each iteration of the while loop. \\
+Initialize $\Delta_{cost} = 0$, $\mathbf{w = 0}, b = 0$ and compute $f_{0}(\mathbf{w}, b)$ with these values.\\
+\textbf{For this method, use $\mathbf{\eta = 0.0001, \epsilon = 0.001}$}.
+
+
+\item  \textbf{Mini batch gradient descent}: Go through the dataset in batches of predetermined size and update the parameters as follows:
+\begin{algorithmic}
+\STATE Randomly shuffle the training data
+\STATE $l = 0, k = 0$
+\WHILE {convergence criteria not reached}
+\FOR {$j = 1,...,d$}
+\STATE Update $w^{(j)} \leftarrow w^{(j)} - \eta \nabla_{w^{(j)}} f_{l}(\mathbf{w},b)$
+\ENDFOR
+\STATE Update $b \leftarrow b - \eta \nabla_{b} f_{l}(\mathbf{w},b)$
+\STATE Update $l \leftarrow (l + 1) \mod ((n+batch\_size -1)/batch\_size)$
+\STATE Update $k \leftarrow k+1$
+\ENDWHILE
+\end{algorithmic}
+where,\\
+$n$ is the number of samples in the training data,\\
+ $d$ is the dimensions of $\mathbf{w}$, \\
+ $\eta$ is the learning rate, \\ 
+  $batch\_size$ is the number of training samples considered in each batch, and\\
+ $\nabla_{w^{(j)}} f_{l}(\mathbf{w},b)$ is defined for a batch of training samples as follows:
+\begin{align*}
+\nabla_{w^{(j)}} f_{l}(\mathbf{w},b)  = \frac{\partial f_{l}(\mathbf{w},b)}{\partial w^{(j)}} = w^{(j)} + C \sum_{i = l*batch\_size + 1}^{min(n, (l+1)*batch\_size)} \frac{\partial L(x_i, y_i)}{\partial w^{(j)}},
+\end{align*} 
+The convergence criteria is $\Delta_{cost}^{(k)} < \epsilon$, where  
+\begin{align*}
+\Delta_{cost}^{(k)} = 0.5*\Delta_{cost}^{(k-1)} + 0.5*\Delta_{\% cost},
+\end{align*}  
+$k$ = iteration number,\\  
+and  $\Delta_{\% cost}$ is same as above (equation~\ref{eq:stop}). 
+
+Calculate $\Delta_{cost}, \Delta_{\% cost}$ at the end of each iteration of the while loop. \\
+Initialize $\Delta_{cost} = 0$, $\mathbf{w = 0}, b = 0$ and compute $f_{0}(\mathbf{w}, b)$ with these values.\\
+\textbf{For this method, use $\mathbf{\eta = 0.00001, \epsilon = 0.01, batch\_size = 20}$.}
+\end{enumerate}
+
+\subquestion{(a) [5 Points]}
+Notice that we have not given you the equation for, $\nabla_{b} f(\mathbf{w},b)$.
+
+\task{What is $\nabla_{b} f(\mathbf{w},b)$ used for the Batch Gradient Descent Algorithm?}
+
+\emph{(Hint: It should be very similar to $\nabla_{w^{(j)}} f(\mathbf{w},b)$.)}
+
+
+\subquestion{(b) [25 Points]}
+\task{Implement the SVM algorithm for all of the above mentioned gradient descent techniques.} \textbf{For this problem, you are allowed to keep the dataset in memory, and you do not need to use Spark.}%in any choice of programming language you prefer.}
+
+Use ${C = 100}$ for all the techniques. For all other parameters, use the values specified in the description of the technique. \textbf{Note:} update $w$ in iteration $i+1$ using the values computed in iteration $i$. Do not update using values computed in the current iteration!
+
+Run your implementation on the data set in \url{q1/data}. The data set contains the following files :
+\begin{enumerate}
+\item \texttt{features.txt} : Each line contains features (comma-separated values) for a single datapoint. It has 6414 datapoints (rows) and 122 features (columns). 
+
+\item \texttt{target.txt} : Each line contains the target variable (y = -1 or 1) for the corresponding row in \texttt{features.txt}.
+
+\end{enumerate}
+
+\task{Plot the value of the cost function $f_k (\mathbf{w},b)$ vs. the number of iterations ($k$). Report the total time taken for convergence by each of the gradient descent techniques. What do you infer from the plots and the time for convergence?}
+
+The diagram should have graphs from all the three techniques on the same plot. 
+
+As a sanity check, Batch GD should converge in 10-300 iterations and SGD between 500-3000 iterations with Mini Batch GD somewhere in-between. However, the number of iterations may vary greatly due to randomness. If your implementation consistently takes longer though, you may have a bug.
+
+
+\subsection*{What to submit}
+\begin{enumerate}[(i)]
+	\item Equation for $\nabla_{b} f(\mathbf{w},b)$. [part (a)]
+	\item Plot of $f_k (\mathbf{w},b)$ vs. the number of updates ($k$).  Total time taken for convergence by each of the gradient descent techniques.  Interpretation of plot and convergence times. [part (b)]
+	\item Submit the code on Gradescope submission website. [part (b)]
+\end{enumerate}
+

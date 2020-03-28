@@ -1,0 +1,113 @@
+\section{Implementing PageRank and HITS (30 points)}
+In this problem, you will learn how to implement the PageRank and HITS
+algorithms in Spark. The general computation should be done in Spark, and you may also include numpy operations whenever needed. You will be experimenting with a small randomly generated graph
+(assume graph has no dead-ends) provided at \texttt{graph-full.txt}.
+
+There are 100 nodes ($n=100$) in the small graph and 1000 nodes ($n=1000$) in the full graph, and $m=8192$ edges, $1000$ of
+which form a directed cycle (through all the nodes) which ensures that the
+graph is connected. It is easy to see that the existence of such a cycle
+ensures that there are no dead ends in the graph. There may be multiple
+directed edges between a pair of nodes, and your solution should treat them as
+the same edge.  The first column in \texttt{graph-full.txt} refers to the
+source node, and the second column refers to the destination node.
+
+\textit{Implementation hint}: You may choose to store the PageRank vector $\bfr$  either in memory or as an RDD.  Only the matrix $M$ of links is too large to store in memory, and you are allowed to store matrix $M$ in an RDD. e.g. \lstinline{data = sc.textFile("graph-full.txt")}. On an actual cluster, an RDD is partitioned across the nodes of the cluster. However, you cannot then \lstinline{M = data.collect()} which fetches the entire RDD to a single machine at the driver node and stores it as an array locally.
+
+\subquestion{(a) PageRank Implementation [15 points]}
+Assume the directed graph $G=(V,E)$ has $n$ nodes (numbered $1,2, \ldots, n$)
+and $m$ edges, all nodes have positive out-degree, and $M=[M_{ji}]_{n\times n}$
+is a an $n\times n$ matrix as defined in class such that for any $i,j \in
+\llbracket 1, n\rrbracket$:
+\[
+	M_{ji} =
+	\left\{
+		\begin{array}{cl}
+			\frac{1}{\deg(i)}	& \text{if } (i\to j)\in E, \\
+			0									& \text{otherwise}.
+		\end{array}
+	\right.
+\]
+
+Here, $\deg(i)$ is the number of outgoing edges of node $i$ in $G$. If there
+are multiple edges in the same direction between two nodes, treat them as a
+single edge. By the definition of PageRank, assuming $1-\beta$ to be the
+teleport probability, and denoting the PageRank vector by the column vector
+$r$, we have the following equation:
+\begin{equation}\label{PageRankDefn}
+	\bfr = \frac{1-\beta}{n}{\mathbf{1}} + \beta M\bfr,
+\end{equation}
+
+
+Based on this equation, the iterative procedure to compute PageRank works as follows:
+
+\begin{enumerate}
+  \item Initialize: $\bfr^{(0)} = \frac{1}{n}{\mathbf{1}}$
+  \item For $i$ from $1$ to $k$, iterate: $\bfr^{(i)} = \frac{1-\beta}{n}{\mathbf{1}} + \beta M\bfr^{(i-1)}$
+\end{enumerate}
+
+Run the aforementioned iterative process in Spark for $40$ iterations (assuming
+$\beta = 0.8$) and obtain the PageRank vector $r$. In particular, you don't
+have to implement the blocking algorithm from lecture. The matrix $M$ can be
+large and should be processed as an RDD in your solution. 
+
+Compute the PageRank scores and report the node id for the following using \texttt{graph-full.txt}:
+\begin{itemize}
+\item List the top $5$ node ids with the highest PageRank scores. 
+\item List the bottom $5$ node ids with the lowest PageRank scores.
+\end{itemize}
+
+For a sanity check, we have provided a smaller dataset (\texttt{graph-small.txt}). In that dataset,
+the top node has id 53 with value 0.036. Note that the \texttt{graph-small.txt} dataset is only provided for sanity check purpose. Your write-up should include results obtained using \texttt{graph-full.txt} (for both part (a) and (b)).
+
+
+\subquestion{(b) HITS Implementation [15 points]}
+Assume the directed graph $G=(V,E)$ has $n$ nodes (numbered $1,2, \ldots, n$) and $m$ edges, all nodes have non-negative out-degree, and $L=[L_{ij}]_{n\times n}$ is a an $n\times n$ matrix referred to as the \emph{link matrix} such that for any $i,j \in \llbracket 1, n\rrbracket$:
+\[
+	L_{ij} =
+	\left\{
+		\begin{array}{cl}
+			1	& \text{if } (i\to j)\in E, \\
+			0									& \text{otherwise}.
+		\end{array}
+	\right.
+\]
+
+Given the link matrix $L$ and some scaling factors $\lambda, \mu$, the hubbiness vector $h$ and the authority vector $a$ can be expressed using the equations:
+\begin{equation}\label{PageRankDefn}
+	h = \lambda L a,
+	a = \mu L^{T} h	
+\end{equation}
+where ${\mathbf{1}}$ is the $n \times 1$ vector with all entries equal to $1$.
+
+Based on this equation, the iterative method to compute $h$ and $a$ is as follows:
+
+\begin{enumerate}
+  \item Initialize $h$ with a column vector (of size $n \times 1$) of all $1$'s.
+  \item Compute $a = L^{T} h$ and scale so that the largest value in the vector $a$ has value $1$.
+  \item Compute $h = L a$ and scale so that the largest value in the vector $h$ has value $1$.
+  \item Go to step 2.
+\end{enumerate}
+
+Repeat the iterative process for $40$ iterations, assume that $\lambda = 1, \mu
+= 1$ and then obtain the hubbiness and authority scores of all the nodes
+(pages). The link matrix $L$ can be large and should be processed as an RDD\@.
+Compute the following using \texttt{graph-full.txt}:
+
+\begin{itemize}
+\item List the $5$ node ids with the highest hubbiness score. 
+\item List the $5$ node ids with the lowest hubbiness score.
+\item List the $5$ node ids with the highest authority score. 
+\item List the $5$ node ids with the lowest authority score.
+\end{itemize}
+
+For a sanity check, you should confirm that \texttt{graph-small.txt} has
+highest hubbiness node id 59 with value 1 and highest authority node id 66
+with value 1.
+
+
+\subsection*{What to submit}
+\begin{enumerate}[(a)]
+\item List $5$ node ids with the highest and least PageRank scores [2(a)] using \texttt{graph-full.txt}
+\item List $5$ node ids with the highest and least hubbiness and authority scores [2(b)] using \texttt{graph-full.txt}
+\item Upload all the code via Gradescope [2(a) \& 2(b)]
+\end{enumerate}

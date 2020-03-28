@@ -1,0 +1,120 @@
+\section{$k$-means on Spark (20 points)}
+
+\textbf{Note:} This problem should be implemented in Spark. You should \textbf{not} use the Spark MLlib clustering library for this problem. You may store the centroids in memory if you choose to do so.
+
+\begin{center}
+	{\footnotesize \ding{92} \hspace{1em} \ding{92} \hspace{1em} \ding{92}}
+\end{center}
+
+
+This problem will help you understand the nitty gritty details of implementing
+clustering algorithms on Spark. In addition, this problem will also help you
+understand the impact of using various distance metrics and initialization
+strategies in practice. Let us say we have a set $\mathcal{X}$ of $n$ data
+points in the $d$-dimensional space $\mathbb{R}^d$. Given the number of
+clusters $k$ and the set of $k$ centroids $\mathcal{C}$, we now proceed to
+define various distance metrics and the corresponding cost functions that they
+minimize. 
+
+\textbf{Euclidean distance}
+Given two points $A$ and $B$ in $d$ dimensional space such that $A = [a_1, a_2 \cdots a_d]$ and $B = [b_1, b_2 \cdots b_d]$, the Euclidean distance between $A$ and $B$ is defined as:
+\begin{equation}\label{eqn:ed}
+||a - b|| = \sqrt{\sum_{i=1}^{d} (a_i - b_i) ^2}
+\end{equation}
+
+The corresponding cost function $\phi$ that is minimized when we assign points to clusters using the Euclidean distance metric is given by:
+\begin{equation}\label{eqn:ced}
+\phi = \sum_{x\in \mathcal{X}} \min_{c\in\mathcal{C}} ||x-c||^2
+\end{equation}
+Note, that in the cost function the distance value is squared. This is intentional, as it is the squared Euclidean distance the algorithm is guaranteed to minimize.
+
+\textbf{Manhattan distance}
+Given two random points $A$ and $B$ in $d$ dimensional space such that $A = [a_1, a_2 \cdots a_d]$ and $B = [b_1, b_2 \cdots b_d]$, the Manhattan distance between $A$ and $B$ is defined as:
+\begin{equation}\label{eqn:md}
+|a - b| = \sum_{i=1}^{d} |a_i - b_i|
+\end{equation}
+
+The corresponding cost function $\psi$ that is minimized when we assign points to clusters using the Manhattan distance metric is given by:
+\begin{equation}\label{eqn:cmd}
+\psi = \sum_{x\in \mathcal{X}} \min_{c\in\mathcal{C}} |x - c|
+\end{equation}
+
+\textbf{Iterative $k$-Means Algorithm:} 
+We learned the basic $k$-Means algorithm in class which is as follows: $k$ centroids are initialized, each point is assigned to the nearest centroid and the centroids are recomputed based on the assignments of points to clusters. In practice, the above steps are run for several iterations.  We present the resulting iterative version of $k$-Means in Algorithm \ref{kmeans}.
+\begin{algorithm}
+\small
+\caption{Iterative $k$-Means Algorithm}
+\label{kmeans}
+\begin{algorithmic}[1]
+\Procedure{Iterative $k$-Means}{}
+\State Select $k$ points as initial centroids of the $k$ clusters. 
+\For{iterations $:=$ 1 to \texttt{MAX\_ITER}}
+\For{each point $p$ in the dataset}
+\State Assign point $p$ to the cluster with the closest centroid
+\EndFor
+\State Calculate the cost for this iteration.
+\For{each cluster $c$}
+\State Recompute the centroid of $c$ as the mean of all the data points assigned to $c$
+\EndFor
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+
+\textbf{Iterative $k$-Means clustering on Spark:} Implement iterative $k$-means
+using Spark. Please use the dataset from \texttt{q2/data} within the bundle for this problem.
+
+The folder has 3 files:
+\begin{enumerate}
+\item \texttt{data.txt} contains the dataset which has 4601 rows and 58
+columns.
+Each row is a document represented as a 58 dimensional vector of features. Each
+component in the vector represents the importance of a word in the document. The ID to download \texttt{data.txt} into a Colab is 1E-voIV2ctU4Brw022Na8RHVVRGOoNkO1
+\item \texttt{c1.txt} contains $k$ initial cluster centroids. These centroids were
+chosen by selecting $k = 10$ random points from the input data. The ID to download \texttt{c1.txt} into a Colab is 1yXNlZWMqUcAwDScBrkFChOHJwR1FZXmI
+\item \texttt{c2.txt} contains initial cluster centroids which are as far apart
+as possible, using Euclidean distance as the distance metric. (You can do this by choosing 1\textsuperscript{st} centroid c1 randomly, and then finding the point c2 that is farthest from c1, then selecting c3 which is farthest from c1 and c2, and so on). The ID to download \texttt{c2.txt} into a Colab is 1vfovle9DgaeK0LnbQTH0j7kRaJjsvLtb
+\end{enumerate}
+
+Set number of iterations (\texttt{MAX\_ITER}) to $20$ and number of clusters
+$k$ to $10$ for all the experiments carried out in this question. Your driver
+program should ensure that the correct amount of iterations are run.
+
+\subquestion{(a) Exploring initialization strategies with Euclidean distance [10 pts]} 
+
+\begin{enumerate}
+\item \textbf{[5 pts] } 
+Using the Euclidean distance (refer to Equation \ref{eqn:ed}) as the distance measure, compute the cost function $\phi(i)$ (refer to Equation \ref{eqn:ced}) for every iteration $i$. This means that, for your first iteration, you'll be computing the cost function using the initial centroids located in one of the two text files. Run the $k$-means on \texttt{data.txt} using \texttt{c1.txt} and \texttt{c2.txt}. Generate a graph where you plot the cost function $\phi(i)$ as a function of the number of iterations $i$=1..20 for \texttt{c1.txt} and also for \texttt{c2.txt}. You may use a single plot or two different plots, whichever you think best answers the theoretical questions we’re asking you about.
+
+\textit{(Hint: Note that you do not need to write a separate Spark job to compute $\phi(i)$. You should be able to calculate costs while partitioning points into clusters.)}
+
+\item \textbf{[5 pts] } What is the percentage change in cost after 10 iterations of the K-Means algorithm when the cluster centroids are initialized using \texttt{c1.txt} vs. \texttt{c2.txt} and the distance metric being used is Euclidean distance? Is random initialization of
+$k$-means using \texttt{c1.txt} better than initialization using \texttt{c2.txt}
+in terms of cost $\phi(i)$? Explain your reasoning.
+
+\textit{(Hint: to be clear, the percentage refers to (cost[0]-cost[10])/cost[0].)}
+
+\end{enumerate}
+
+\subquestion{(b) Exploring initialization strategies with Manhattan distance [10 pts]} 
+\begin{enumerate}
+\item \textbf{[5 pts] } 
+Using the Manhattan distance metric (refer to Equation \ref{eqn:md}) as the distance measure, compute the cost function $\psi(i)$ (refer to Equation \ref{eqn:cmd}) for every iteration $i$. This means that, for your first iteration, you'll be computing the cost function using the initial centroids located in one of the two text files. Run the $k$-means on \texttt{data.txt} using \texttt{c1.txt} and \texttt{c2.txt}. Generate a graph where you plot the cost function $\psi(i)$ as a function of the number of iterations $i$=1..20 for \texttt{c1.txt} and also for \texttt{c2.txt}. You may use a single plot or two different plots, whichever you think best answers the theoretical questions we’re asking you about.
+
+\textit{(Hint: This problem can be solved in a similar manner to that of part (a). Also note that It's possible that for Manhattan distance, the cost do not always decrease. K-means only ensures monotonic decrease of cost for squared Euclidean distance. Look up K-medians to learn more.)}
+
+\item \textbf{[5 pts] } What is the percentage change in cost after 10 iterations of the K-Means algorithm when the cluster centroids are initialized using \texttt{c1.txt} vs. \texttt{c2.txt} and the distance metric being used is Manhattan distance? Is random initialization of
+$k$-means using \texttt{c1.txt} better than initialization using \texttt{c2.txt}
+in terms of cost $\psi(i)$? Explain your reasoning.
+
+\end{enumerate}
+
+\textbf{What to submit:}\\
+\begin{enumerate}[(i)]
+\item Upload the code for 2(a) and 2(b) to Gradescope
+\item A plot of cost vs. iteration for two initialization strategies [2(a)]
+\item Percentage improvement values and your explanation [2(a)]
+\item A plot of cost vs. iteration for two initialization strategies [2(b)]
+\item Percentage improvement values and your explanation [2(b)]
+\end{enumerate}
+

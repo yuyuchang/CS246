@@ -1,0 +1,30 @@
+\section{Dead ends in PageRank computations (25 points)}
+
+Let the {\em matrix of the Web} M be an $n$-by-$n$ matrix, where $n$ is the number of Web pages.  The entry $m_{ij}$  in row $i$ and column $j$ is 0, unless there is an arc from node (page) $j$ to node $i$.  In that case, the value of $m_{ij}$ is $1/k$, where $k$ is the number of arcs (links) out of node $j$.  Notice that if node $j$ has $k>0$ arcs out, then column $j$ has $k$ values of $1/k$ and the rest 0's.  If node $j$ is a {\em dead end} (i.e., it has zero arcs out), then column $j$ is all 0's.
+
+\def\bfr{{\bf r}}
+
+Let $\bfr = [r_1,r_2,\ldots,r_n]^T$ be (an estimate of) the PageRank vector; that is, $r_i$ is the estimate of the PageRank of node $i$.  Define $w(\bfr)$ to be the sum of the components of $\bfr$; that is $w(\bfr) = \sum_{i=1}^n r_i$.
+
+In one iteration of the PageRank algorithm, we compute the next estimate $\bfr'$ of the PageRank as: $\bfr' = M\bfr$.  Specifically, for each $i$ we compute $r'_i = \sum_{j=1}^n M_{ij}  r_j$. Define $w(\bfr')$ to be the sum of components of $r'$; that is $w(\bfr') = \sum_{i=1}^n r_i'$.
+
+You may use D (the set of dead nodes) in your equation.
+
+\subquestion{(a) [6pts]} Suppose the Web has no dead ends.  Prove that $w(\bfr') = w(\bfr)$.
+
+\subquestion{(b) [9pts]} Suppose there are still no dead ends, but we use a teleportation probability of $1-\beta$ where we teleport to a random node $(0<\beta<1)$.  The expression for the next estimate of $r_i$ becomes
+$r'_i = \beta (\sum_{j=1}^n M_{ij} r_j) + (1-\beta)/n$.
+Under what circumstances will $w(\bfr') = w(\bfr)$?  Prove your conclusion.
+
+\subquestion{(c) [10pts]} Now let us assume there are one or more dead ends. Call a node ``dead'' if it is a dead end and ``live'' if not. 
+At each iteration, we teleport from live nodes with probability $1-\beta$ and teleport from dead nodes with probability $1$. In both cases, we choose a random node uniformly to teleport to. Assume $w(\bfr) = 1$.
+
+Write the equation for $r'_i$ in terms of $\beta$, $M$, $\bfr$, $n$, and $D$ (where $D$ is the set of dead nodes).
+Then, prove that $w(\bfr')$ is also 1.
+
+\subsection*{What to submit}
+\begin{enumerate}[(a)]
+\item Proof [1(a)]
+\item Condition for $w(\bfr') = w(\bfr)$ and Proof [1(b)]
+\item Equation for $r'_i$ and Proof [1(c)]
+\end{enumerate}

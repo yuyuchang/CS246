@@ -1,0 +1,69 @@
+\section{Singular Value Decomposition and Principal Component Analysis (20 points)}
+
+In this problem we will explore the relationship between two of the most popular dimensionality-reduction techniques, SVD and PCA, at a basic conceptual level. Before we proceed with the question itself, let us briefly recap the SVD and PCA techniques and a few important observations:
+\begin{itemize}
+\item First, recall that the eigenvalue decomposition of a \emph{real}, \emph{symmetric}, and \emph{square matrix} $B$ (of size $d \times d$) can be written as the following product:
+\[
+	B = Q \Lambda \transpose{Q}
+\]
+where $\Lambda = \text{diag}(\lambda_1, \dots, \lambda_d)$ contains the eigenvalues of $B$ (which are always real) along its main diagonal and $Q$ is an orthogonal matrix containing the eigenvectors of $B$ as its columns. 
+
+\item Principal Component Analysis (PCA): Given a data matrix $M$ (of size $p \times q$), PCA involves the computation of the eigenvectors of $M M^T$ or $M^T M$. The matrix of these eigenvectors can be thought of as a rigid rotation in a high dimensional space. When you apply this transformation to the original data,
+the axis corresponding to the principal eigenvector is the one along which the
+points are most “spread out.” More precisely, this axis is the one along which
+the variance of the data is maximized. Put another way, the points can best be
+viewed as lying along this axis, with small deviations from this axis. Likewise,
+the axis corresponding to the second eigenvector (the eigenvector corresponding
+to the second-largest eigenvalue) is the axis along which the variance of
+distances from the first axis is greatest, and so on.
+\item Singular Value Decomposition (SVD): SVD involves the decomposition of a data matrix $M$ (of size $p \times q$) into a product: $U \Sigma V^T$ where $U$ (of size $p \times k$) and $V$ (of size $q \times k$) are column-orthonormal matrices\footnote{A matrix $U \in \mathbb{R}^{p \times q}$ is column-orthonormal if and only if $U^TU = I$ where $I$ denotes the identity matrix} and $\Sigma$ (of size $k \times k$) is a diagonal matrix. The entries along the diagonal of $\Sigma$ are referred to as singular values of $M$. The key to understanding what SVD offers is in viewing the r columns of $U$, $\Sigma$, and $V$ as representing concepts that are hidden in the original matrix M.
+\end{itemize}
+
+For answering the questions below, let us define a real matrix $M$ (of size $p \times q$) and let us assume this matrix corresponds to a dataset with $p$ data points and $q$ dimensions. 
+
+\subquestion{(a) [3 points]} 
+Are the matrices $M M^T$ and $M^T M$ symmetric, square and real? Explain.
+
+\subquestion{(b) [5 points]}
+Prove that the nonzero eigenvalues of $M M^T$ are the same as the nonzero eigenvalues of $M^T M$. You may ignore multiplicity of eigenvalues. Are their eigenvectors the same? 
+
+\subquestion{(c) [2 points]}
+Given that we now understand certain properties of $M^T M$, write an expression for $M^T M$ in terms of $Q$, $Q^T$ and $\Lambda$ where $\Lambda = \text{diag}(\lambda_1, \dots, \lambda_d)$ contains the eigenvalues of $M^T M$ along its main diagonal and $Q$ is an orthogonal matrix containing the eigenvectors of $M^T M$ as its columns?\\
+\textit{Hint: Check the definition of eigenvalue decomposition provided in the beginning of the question to see if it is applicable.}
+
+
+\subquestion{(d) [5 points]}
+SVD decomposes the matrix $M$ into the product $U \Sigma V^T$ where $U$ and $V$ are column-orthonormal and $\Sigma$ is a diagonal matrix. Given that $M = U \Sigma V^T$, write a simplified expression for $M^T M$ in terms of $V$, $V^T$ and $\Sigma$.
+
+\subquestion{(e) [5 points]}
+In this question, let us experimentally test if SVD decomposition of $M$ actually provides us the eigenvectors (PCA dimensions) of $M^T M$. We strongly recommend students to use Python and suggested functions for this exercise.\footnote{Other implementations of SVD and PCA might give slightly different results. Besides, you will just need fewer than five python commands to answer this entire question} Initialize matrix $M$ as follows: 
+\[ M =
+\begin{bmatrix}
+1 & 2\\
+2 & 1\\
+3 & 4\\
+4 & 3\\
+\end{bmatrix}
+\] 
+\begin{itemize}
+\item Compute the SVD of $M$ (\emph{Use scipy.linalg.svd function in Python and set the argument \texttt{full\_matrices} to False}). The function returns values corresponding to $U$, $\Sigma$ and $V^T$. What are the values returned for $U$, $\Sigma$ and $V^T$?
+\emph{Note: Make sure that the first element of the returned array $\Sigma$ has a greater value than the second element.}
+\item Compute the eigenvalue decomposition of $M^T M$ (\emph{Use scipy.linalg.eigh function in Python}). The function returns two parameters: a list of eigenvalues (let us call this list $Evals$) and a matrix whose columns correspond to the eigenvectors of the respective eigenvalues (let us call this matrix $Evecs$). Sort the list $Evals$ in descending order such that the largest eigenvalue appears first in the list. Also, re-arrange the columns in $Evecs$ such that the eigenvector corresponding to the largest eigenvalue appears in the first column of $Evecs$. 
+What are the values of $Evals$ and $Evecs$ (after the sorting and re-arranging process)?\\
+%\emph{Note: Check the ordering of the eigenvalues in the list when you associate eigenvectors with the eigenvalues.}
+
+
+\item Based on the experiment and your derivations in part (c) and (d), do you see any correspondence between $V$ produced by SVD and the matrix of eigenvectors $Evecs$ (after the sorting and re-arranging process) produced by eigenvalue decomposition? If so, what is it?\\
+\emph{Note: The function scipy.linalg.svd returns $V^T$ (not $V$).}
+
+
+\item Based on the experiment and the expressions obtained in part (c) and part (d) for $M^T M$, what is the relationship (if any) between the eigenvalues of $M^T M$ and the singular values of $M$? Explain. \\
+\textit{Note: The entries along the diagonal of $\Sigma$ (part (e)) are referred to as singular values of $M$. The eigenvalues of $M^T M$ are captured by the diagonal elements in $\Lambda$ (part (d))}
+
+\end{itemize}
+
+{\bf What to submit:} 
+\begin{enumerate}[(i)]
+\item Written solutions to questions 1(a) to 1(e) with explanations wherever required
+\item Upload the code via Gradescope [1(e)]
+\end{enumerate}

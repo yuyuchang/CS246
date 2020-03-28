@@ -1,0 +1,22 @@
+\section{Clique-Based Communities (25 points)}
+
+Imagine an undirected graph $G$ with nodes $2,3,4,\ldots,1000000$.  (Note that there is no node $1$.)  There is an edge between nodes $i$ and $j$ if and only if $i$ and $j$ have a common factor other than 1.  Put another way, the only edges that are missing are those between nodes that are relatively prime; e.g., there is no edge between 15 and 56.
+
+We want to find communities by starting with a clique (not a bi-clique) and growing it by adding nodes.  However, when we grow a clique, we want to keep the density of edges at 1; i.e., the set of nodes remains a clique at all times.  A {\em maximal clique} is a clique for which it is impossible to add a node and still retain the property of being a clique; i.e., a clique $C$ is maximal if every node not in $C$ is missing an edge to at least one member of $C$.
+
+Let $C_i$ be the set of nodes of $G$ that are divisible by $i$, where $i$ is a positive integer. 
+
+\subquestion{(a) [5 points]} Prove that $C_i$ is a clique for any $i$. 
+
+\subquestion{(b) [10 points]} Under what circumstances is $C_i$ a maximal clique?  Prove that your conditions are both necessary and sufficient.  (Trivial conditions, like ``$C_i$ is a maximal clique if and only if $C_i$ is a maximal clique,'' will receive no credit.)
+
+\subquestion{(c) [10 points]}
+
+Prove that $C_2$ is the unique largest clique. That is, it has more elements than any other clique. (\textbf{Note}: Not all cliques are in the form of $C_i$)
+
+\subsection*{What to submit}
+\begin{enumerate}[(a)]
+\item Proof that the specified nodes are a clique.
+\item Necessary and sufficient conditions for $C_i$ to be a maximal clique, with proof.
+\item Proof that $C_2$ is the unique largest clique.
+\end{enumerate}
